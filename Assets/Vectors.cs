@@ -30,7 +30,10 @@ public class Vectors : MonoBehaviour
 
         // Draw huge cross
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(o, 100f);
+        //Gizmos.DrawWireSphere(o, 100f);
+        Gizmos.DrawLine(Vector3.left*100f, Vector3.right*100f);
+        Gizmos.DrawLine(Vector3.up*100f, Vector3.down*100f);
+        Gizmos.DrawLine(Vector3.forward*100f, Vector3.back*100f);
 
         // Draw Origin unit circle
         Handles.color = Color.gray;
@@ -64,7 +67,7 @@ public class Vectors : MonoBehaviour
 
         // Draw length label, midway between o and p
         float pLen = Vector2.Distance(o, p);
-        Vector2 pMid = o + (p - o) / 2;
+        Vector2 pMid = KUtil.Middle(o,p);
         Handles.Label(new Vector3(pMid.x, pMid.y, 0f), pLen.ToString("F2"), black);
 
         // Draw p coords label
@@ -101,19 +104,15 @@ public class Vectors : MonoBehaviour
     {
         Vector2 a = new Vector2(-2f, 3f);
         Vector2 b = new Vector2(1f, 2f);
-        //const float X = -2, Y = 3;
 
         "╭────────┰─────────────────────────────────────╮".Log();
-        "│  <color=#FF4242>┐ ┬╮</color>  ┃  <color=#FF4242>╭╮ ╭╮ ╭╮ ╷  ╭╮ ┌╮   ╭╴ ╷  ╭╮ ╭╮╶┬╴</color> │"
-            .Log();
-        "│  <color=#FF4242>│ ││</color>  ┃  <color=#FF4242>╰╮ │  ├┤ │  ├┤ ├┤   ├╴ │  ││ ├┤ │ </color> │"
-            .Log();
-        "│  <color=#FF4242>┴ ┴╯</color>  ┃  <color=#FF4242>╰╯ ╰╯ ╵╵ ╰─ ╵╵ ╵╰   ╵  ╰─ ╰╯ ╵╵ ╵ </color> │"
-            .Log();
+        "│  ┐ ┬╮  ┃  ╭╮ ╭╮ ╭╮ ╷  ╭╮ ┌╮   ╭╴ ╷  ╭╮ ╭╮╶┬╴ │".Log();
+        "│  │ ││  ┃  ╰╮ │  ├┤ │  ├┤ ├┤   ├╴ │  ││ ├┤ │  │".Log();
+        "│  ┴ ┴╯  ┃  ╰╯ ╰╯ ╵╵ ╰─ ╵╵ ╵╰   ╵  ╰─ ╰╯ ╵╵ ╵  │".Log();
         "╰────────┸─────────────────────────────────────╯".Log();
 
         "╭─────┰──────────────────────────────╮".Log();
-        "│ <color=cyan>+ -</color> ┃ <color=cyan>Offset. Addition/Subtraction</color> │".Log();
+        "│ + - ┃ Offset. Addition/Subtraction │".Log();
         "╰─────┸──────────────────────────────╯".Log();
         (" 2 +  1 =  " /* 3 */ + (2 + 1)).Log();
         (" 1 + -1 =  " /* 0 */ + (1 + -1)).Log();
@@ -125,10 +124,10 @@ public class Vectors : MonoBehaviour
         ("-1 -  2 = " /* -3 */ + (-1 - 2)).Log();
         ("-2 - -1 = " /* -1 */ + (-2 - -1)).Log();
         "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌".Log();
-        "<color=yellow>a - b</color>  ==  <color=yellow>a + (-b)</color>".Log();
+        "a - b  ==  a + (-b)".Log();
 
         "╭─────┰────────────────────────╮".Log();
-        "│ <color=cyan>* /</color> ┃ <color=cyan>Scale. Multiply/Divide</color> │".Log();
+        "│ * / ┃ Scale. Multiply/Divide │".Log();
         "╰─────┸────────────────────────╯".Log();
         (" 10 *  2   =  " /* 20 */ + 10 * 2).Log();
         (" 10 *  0.5 =   " /* 5 */ + 10 * 0.5f).Log();
@@ -140,25 +139,24 @@ public class Vectors : MonoBehaviour
         (" -5 /  4   =  " /* -1.25 */ + -5f / 4).Log();
         ("-10 / -2   =   " /* 5 */ + -10 / -2).Log();
         "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌".Log();
-        "<color=yellow>a / b</color>  ==  <color=yellow>a * (1 / b)</color>".Log();
+        "a / b  ==  a * (1 / b)".Log();
 
         "╭─────────┰───────────────────────────╮".Log();
-        "│ <color=cyan>Sign(x)</color> ┃ <color=cyan>Direction. either -1 or 1</color> │".Log();
+        "│ Sign(x) ┃ Direction. either -1 or 1 │".Log();
         "╰─────────┸───────────────────────────╯".Log();
         ("Mathf.Sign(-10) = " /* -1 */ + Mathf.Sign(-10)).Log();
         ("Mathf.Sign(  0) =  " /* 1 */ + Mathf.Sign(0)).Log();
         ("Mathf.Sign( 10) =  " /* 1 */ + Mathf.Sign(10)).Log();
 
         "╭────────┰────────────────────────────────────────────────╮".Log();
-        "│ <color=cyan>Abs(x)</color> ┃ <color=cyan>Length/Magnitude. Convert negative to positive</color> │"
-            .Log();
+        "│ Abs(x) ┃ Length/Magnitude. Convert negative to positive │".Log();
         "╰────────┸────────────────────────────────────────────────╯".Log();
         ("Mathf.Abs(-10) = " /* 10 */ + Mathf.Abs(-10)).Log();
         ("Mathf.Abs(  0) =  " /* 0 */ + Mathf.Abs(0)).Log();
         ("Mathf.Abs( 10) = " /* 10 */ + Mathf.Abs(10)).Log();
 
         "╭────────────┰──────────╮".Log();
-        "│ <color=cyan>Abs(a - b)</color> ┃ <color=cyan>Distance</color> │".Log();
+        "│ Abs(a - b) ┃ Distance │".Log();
         "╰────────────┸──────────╯".Log();
         ("Mathf.Abs( 1 -  3) = " /* 2 */ + Mathf.Abs(1 - 3)).Log();
         ("Mathf.Abs( 3 -  1) = " /* 2 */ + Mathf.Abs(3 - 1)).Log();
@@ -166,8 +164,7 @@ public class Vectors : MonoBehaviour
         ("Mathf.Abs(-1 -  1) = " /* 2 */ + Mathf.Abs(-1 - 1)).Log();
 
         "╭──────────┰─────────────────────────────────────────╮".Log();
-        "│ <color=cyan>Round(f)</color> ┃ <color=cyan>Convert decimal to nearest whole number</color> │"
-            .Log();
+        "│ Round(f) ┃ Convert decimal to nearest whole number │".Log();
         "╰──────────┸─────────────────────────────────────────╯".Log();
         ("Mathf.Round( 1.499) =  " /* 1 */ + Mathf.Round(1.499f)).Log();
         ("Mathf.Round( 1.5  ) =  " /* 2 */ + Mathf.Round(1.5f)).Log();
@@ -175,8 +172,7 @@ public class Vectors : MonoBehaviour
         ("Mathf.Round(-1.5  ) = " /* -2 */ + Mathf.Round(-1.5f)).Log();
 
         "╭────────────────────┰───────────────────────────────╮".Log();
-        "│ <color=cyan>Clamp(v, min, max)</color> ┃ <color=cyan>Limit v between a min and max</color> │"
-            .Log();
+        "│ Clamp(v, min, max) ┃ Limit v between a min and max │".Log();
         "╰────────────────────┸───────────────────────────────╯".Log();
         ("Mathf.Clamp(-0.5, -1, 1) = " /* -0.5 */ + Mathf.Clamp(-0.5f, -1, 1)).Log();
         ("Mathf.Clamp(-0.5,  0, 1) =  " /* 0 */ + Mathf.Clamp(-0.5f, 0, 1)).Log();
@@ -187,45 +183,38 @@ public class Vectors : MonoBehaviour
         ("Mathf.Clamp( 1.5,  0, 2) =  " /* 1.5 */ + Mathf.Clamp(1.5f, 0, 2)).Log();
 
         "╭─────────┰───────────────────────╮".Log();
-        "│  <color=#5BFF51>╭╮ ┬╮</color>  ┃  <color=#5BFF51>╷╷ ╭╴ ╭╮╶┬╴╭╮ ┌╮ ╭╮</color>  │".Log();
-        "│  <color=#5BFF51>╭╯ ││</color>  ┃  <color=#5BFF51>││ ├╴ │  │ ││ ├┤ ╭╯</color>  │".Log();
-        "│  <color=#5BFF51>└╴ ┴╯</color>  ┃  <color=#5BFF51>╰┘ ╰─ ╰╯ ╵ ╰╯ ╵╰ └╴</color>  │".Log();
+        "│  ╭╮ ┬╮  ┃  ╷╷ ╭╴ ╭╮╶┬╴╭╮ ┌╮ ╭╮  │".Log();
+        "│  ╭╯ ││  ┃  ││ ├╴ │  │ ││ ├┤ ╭╯  │".Log();
+        "│  └╴ ┴╯  ┃  ╰┘ ╰─ ╰╯ ╵ ╰╯ ╵╰ └╴  │".Log();
         "╰─────────┸───────────────────────╯".Log();
 
         "╭─────────────┰───────────────────────────────────╮".Log();
-        "│ <color=cyan>a.magnitude</color> ┃ <color=cyan>Get the length of a (from origin)</color> │".Log();
+        "│ a.magnitude ┃ Get the length of a (from origin) │".Log();
         "╰─────────────┸───────────────────────────────────╯".Log();
-        "<color=yellow>a: -2, 3</color>".Log();
+        "a: -2, 3".Log();
         "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌".Log();
-        ("     <color=yellow>a.x</color> * <color=yellow>a.x</color>              = " /* 4 */ + a.x * a.x)
-            .Log();
-        ("     <color=yellow>a.y</color> * <color=yellow>a.y</color>              = " /* 9 */ + a.y * a.y)
-            .Log();
+        ("     a.x * a.x              = " /* 4 */ + a.x * a.x).Log();
+        ("     a.y * a.y              = " /* 9 */ + a.y * a.y).Log();
         ("     4 + 9                  = " /* 13 */ + (a.x * a.x + a.y * a.y)).Log();
-        ("Sqrt(13)                    = " /* 3.6... */ + (a.x * a.x + a.y * a.y).Sqrt()).Log();
-        ("Sqrt(<color=yellow>a.x</color> * <color=yellow>a.x</color> + <color=yellow>a.y</color> * <color=yellow>a.y</color>) = " /* 3.6... */ +
-         (a.x * a.x + a.y * a.y).Sqrt()).Log();
-        ("<color=yellow>a</color>.magnitude                 = " + (a.magnitude)).Log();
+        ("Sqrt(13)                    = " /* 3.6.. */ + (a.x * a.x + a.y * a.y).Sqrt()).Log();
+        ("Sqrt(a.x * a.x + a.y * a.y) = " /* 3.6.. */ + (a.x * a.x + a.y * a.y).Sqrt()).Log();
+        ("a.magnitude                 = " + (a.magnitude)).Log();
 
         "╭────────────────────────┰──────────────────────────╮".Log();
-        "│ <color=cyan>Vector2.Distance(a, b)</color> ┃ <color=cyan>Get distance from a to b</color> │".Log();
+        "│ Vector2.Distance(a, b) ┃ Get distance from a to b │".Log();
         "╰────────────────────────┸──────────────────────────╯".Log();
-        "<color=yellow>a: -2, 3</color>".Log();
-        "<color=yellow>b:  1, 2</color>".Log();
+        "a: -2, 3".Log();
+        "b:  1, 2".Log();
         "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌".Log();
-        ("(<color=yellow>b</color> - <color=yellow>a</color>).magnitude      = " /*  */ + (a - b).magnitude)
-            .Log();
-        ("Vector2.Distance(<color=yellow>a</color>, <color=yellow>b</color>) = " /*  */ +
-         Vector2.Distance(a, b)).Log();
+        ("(b - a).magnitude      = " /* 3.1.. */ + (a - b).magnitude).Log();
+        ("Vector2.Distance(a, b) = " /* 3.1.. */ + Vector2.Distance(a, b)).Log();
         "╭────────────────────┰──────────────────────────────╮".Log();
-        "│ <color=cyan>KUtil.Middle(a, b)</color> ┃ <color=cyan>Get midpoint between a and b</color> │".Log();
+        "│ KUtil.Middle(a, b) ┃ Get midpoint between a and b │".Log();
         "╰────────────────────┸──────────────────────────────╯".Log();
-        "<color=yellow>a: -2, 3</color>".Log();
-        "<color=yellow>b:  1, 2</color>".Log();
+        "a: -2, 3".Log();
+        "b:  1, 2".Log();
         "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌".Log();
-        ("(<color=yellow>a</color> + (<color=yellow>b</color> - <color=yellow>a</color>) / 2)  = " /*  */ +
-         (a + (b - a) / 2)).Log();
-        ("KUtil.Middle(<color=yellow>a</color>, <color=yellow>b</color>) = " /*  */ + KUtil.Middle(a, b))
-            .Log();
+        ("(a + (b - a) / 2)  = " /* (-0.5, 2.5) */ + (a + (b - a) / 2)).Log();
+        ("KUtil.Middle(a, b) = " /* (-0.5, 2.5) */ + KUtil.Middle(a, b)).Log();
     }
 }

@@ -122,14 +122,14 @@ public static class ExtensionMethods
     /// </summary>
     /// <param name="v">Input value</param>
     /// <returns>Rounded value</returns>
-    // private static Vector3 Round(this Vector3 v)
-    // {
-    //     return new Vector3(
-    //         Mathf.Round(v.x),
-    //         Mathf.Round(v.y),
-    //         Mathf.Round(v.z)
-    //     );
-    // }
+    private static Vector3 Round(this Vector3 v)
+    {
+        return new Vector3(
+            Mathf.Round(v.x),
+            Mathf.Round(v.y),
+            Mathf.Round(v.z)
+        );
+    }
 
     /// <summary>
     /// Round v to increments of s
@@ -137,5 +137,5 @@ public static class ExtensionMethods
     /// <param name="v">Input value</param>
     /// <param name="s">Step size</param>
     /// <returns>Rounded value</returns>
-    //public static Vector3 Round(this Vector3 v, float s) { return (v / s).Round() * s; }
+    public static Vector3 Round(this Vector3 v, float s) { return (v / s).Round() * s; }
 }

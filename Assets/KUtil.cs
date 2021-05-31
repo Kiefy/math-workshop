@@ -1,5 +1,28 @@
 using UnityEngine;
 
+// ╭────────────────────╮
+// │ INT                │
+// ┝━━━━━━━━━━━━━━━━━━━━┥
+// │ None yet.          │
+// ╰────────────────────╯
+// ╭────────────────────╮
+// │ FLOAT            X │
+// ┝━━━━━━━━━━━━━━━━━━━━┥
+// │ x = Distance(a, b) │
+// ╰────────────────────╯
+// ╭──────────────────────╮
+// │ VECTOR2           XY │
+// ┝━━━━━━━━━━━━━━━━━━━━━━┥
+// │ xy = Direction(a, b) │
+// │ x  = Distance(a, b)  │
+// │ xy = Middle(a, b)    │
+// ╰──────────────────────╯
+// ╭──────────────────────╮
+// │ VECTOR3          XYZ │
+// ┝━━━━━━━━━━━━━━━━━━━━━━┥
+// │ xyz = Distance(a, b) │
+// ╰──────────────────────╯
+
 public static class KUtil
 {
     ///////////
@@ -11,13 +34,28 @@ public static class KUtil
     /// </summary>
     /// <param name="a">Start</param>
     /// <param name="b">End</param>
-    /// <returns>Result</returns>
-    public static float Distance(float a, float b) { return Mathf.Abs(a - b); }
+    /// <returns>Distance</returns>
+    public static float Distance(float a, float b)
+    {
+        return Mathf.Abs(a - b);
+    }
 
     //////////////
     // VECTOR 2 //
     //////////////
 
+    /// <summary>
+    /// Get direction from a to b
+    /// </summary>
+    /// <param name="a">Base</param>
+    /// <param name="b">Target</param>
+    /// <returns>Unit vector</returns>
+    public static Vector2 Direction(Vector2 a, Vector2 b)
+    {
+        return (b - a).normalized;
+    }
+
+    // Dupe: Vector2.Distance(a, b)
     /// <summary>
     /// Get distance between a and b
     /// </summary>

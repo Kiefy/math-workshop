@@ -201,7 +201,7 @@ public static class ExtensionMethods
     // VECTOR 3 //
     //////////////
     // v3.Round()
-    // v3.Round(step)
+    // v3.Round(s)
 
     /// <summary>
     /// Round Vector3 (Remove decimals)

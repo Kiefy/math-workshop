@@ -54,6 +54,18 @@ public static class ExtensionMethods
     /// <param name="s">string value</param>
     public static void Log(this string s) { Debug.Log(s); }
 
+    /// <summary>
+    /// Debug log - ie. new Vector2(-2, 3).Log();
+    /// </summary>
+    /// <param name="v2">Vector2 value</param>
+    public static void Log(this Vector2 v2) { Debug.Log(v2); }
+
+    /// <summary>
+    /// Debug log - ie. new Vector3(-2, 3, 1).Log();
+    /// </summary>
+    /// <param name="v3">Vector3 value</param>
+    public static void Log(this Vector3 v3) { Debug.Log(v3); }
+
 
     /////////
     // Int //
@@ -177,10 +189,9 @@ public static class ExtensionMethods
     /// <returns>distance</returns>
     public static float Distance(this Vector2 a, Vector2 b)
     {
-        Vector2 output = new Vector2(a.x - b.x, a.y - b.y);
-
-        float ax = (a.x * a.x + a.y * a.y).Sqrt();
-        float bx = (b.x * b.x + b.y * b.y).Sqrt();
+        //Vector2 output = new Vector2(a.x - b.x, a.y - b.y);
+        //float ax = (a.x * a.x + a.y * a.y).Sqrt();
+        //float bx = (b.x * b.x + b.y * b.y).Sqrt();
 
         return Vector2.Distance(a, b);
     }

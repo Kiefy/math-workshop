@@ -5,6 +5,7 @@ public class Vectors : MonoBehaviour
 {
     public bool loop;
     [Range(0f, 0.02f)] public float speed;
+    private const int MARKER_COUNT = 20;
 
     public Transform targetTransform;
     private float offsetP;
@@ -18,6 +19,8 @@ public class Vectors : MonoBehaviour
     private readonly Color darkGreenColor = new Color(0.18f, 0.5f, 0.16f);
     private readonly Color darkBlueColor = new Color(0.13f, 0.29f, 0.5f);
     private readonly Color darkYellowColor = new Color(0.5f, 0.45f, 0.01f);
+    private readonly Color darkCyanColor = new Color(0f, 0.5f, 0.5f);
+
 
     private void OnDrawGizmos()
     {
@@ -35,6 +38,7 @@ public class Vectors : MonoBehaviour
         Vector2 origin = Vector2.zero;
         Vector2 player = transform.position;
         Vector2 target = targetTransform.position;
+
 
         ////////////
         // Origin //
@@ -54,16 +58,94 @@ public class Vectors : MonoBehaviour
         Handles.DrawBezier(forward, back, forward, back, darkBlueColor, null, 2f);
 
         // Draw Origin unit circle
-        Handles.color = darkYellowColor;
+        Handles.color = new Color(1f, 1f, 1f, 0.2f);
         Handles.DrawWireDisc(origin, Vector3.forward, 1f, 2f);
 
-        // Draw axis number labels
-        // for (int i = -10; i <= 10; i++)
-        // {
-        //     if (i == 0) continue;
-        //     Handles.Label(new Vector3(i / 10f - 0.011f, 0.005f, 0f), i.ToString("F0"), red);
-        //     Handles.Label(new Vector3(-0.04f, i / 10f - (-0.025f), 0), i.ToString("F0"), green);
-        // }
+
+        // Axis Line markers
+        for (int i = 1; i < MARKER_COUNT + 1; i++)
+        {
+            if (i % 10 == 0)
+            {
+                Handles.DrawBezier(
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.1f),
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.1f),
+                    redColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.1f),
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.1f),
+                    redColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.1f, i * 0.1f),
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.1f, i * 0.1f),
+                    greenColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.1f, i * -0.1f),
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.1f, i * -0.1f),
+                    greenColor, null, 4f
+                );
+            }
+            else
+            {
+                Handles.DrawBezier(
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.05f),
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.05f),
+                    redColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.05f),
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.05f),
+                    redColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.05f, i * 0.1f),
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.05f, i * 0.1f),
+                    greenColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.05f, i * -0.1f),
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.05f, i * -0.1f),
+                    greenColor, null, 2f
+                );
+            }
+        }
+
+
+        //Draw axis number labels
+        for (int i = 1; i <= MARKER_COUNT / (MARKER_COUNT / 2); i++)
+        {
+            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), redStyle);
+        }
+
+        for (int i = -(MARKER_COUNT / (MARKER_COUNT / 2)); i < 0; i++)
+        {
+            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), redStyle);
+        }
 
         /////////////////////
         // Origin To Point //
@@ -130,7 +212,9 @@ public class Vectors : MonoBehaviour
         Handles.Label(targetOffsetX, "X: " + target.x.ToString("F2"), redStyle);
         Handles.Label(targetOffsetY, "Y: " + target.y.ToString("F2"), greenStyle);
 
-        // Traveling spheres
+        // ╭───────────────────╮
+        // │ Traveling spheres │
+        // ╰───────────────────╯
         if (loop && !jump && offsetP < originPlayerDistance)
         {
             offsetP += speed;
@@ -282,5 +366,8 @@ public class Vectors : MonoBehaviour
         (a + b / 2).Log();
         ("a + (b - a) / 2    = " /* (-0.5, 2.5) */ + (a + (b - a) / 2)).Log();
         ("KUtil.Middle(a, b) = " /* (-0.5, 2.5) */ + KUtil.Middle(a, b)).Log();
+        "╭────────────────────┰──────────────────────────────╮".Log();
+        "│ Lerp(a, b, t) ┃ Blend from a to b based on t │".Log();
+        "╰────────────────────┸──────────────────────────────╯".Log();
     }
 }

@@ -1,23 +1,22 @@
 using System;
 using UnityEngine;
 
-// ╭────────────────────╮
-// │ INT                │
-// ┝━━━━━━━━━━━━━━━━━━━━┥
-// │ None yet.          │
-// ╰────────────────────╯
-// ╭────────────────────╮
-// │ FLOAT            X │
-// ┝━━━━━━━━━━━━━━━━━━━━┥
-// │ x = Distance(a, b) │ Useless?
-// ╰────────────────────╯
-// ╭──────────────────────╮
-// │ VECTOR2           XY │
-// ┝━━━━━━━━━━━━━━━━━━━━━━┥
-// │ xy = Direction(a, b) │
-// │ x  = Distance(a, b)  │ Dupe: Vector2.Distance(a, b)
-// │ xy = Middle(a, b)    │
-// ╰──────────────────────╯
+// ╭──────────────────────────────────────╮
+// │ FLOAT                              X │
+// ┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+// │ x = Distance(a, b)                   │ Useless?
+// │ v = Lerp(min, max, t)                │
+// │ t = InvLerp(min, max, v)             │
+// │ t = Remap(iMin, iMax, oMin, oMax, v) │
+// ╰──────────────────────────────────────╯
+// ╭────────────────────────╮
+// │ VECTOR2             XY │
+// ┝━━━━━━━━━━━━━━━━━━━━━━━━┥
+// │ xy = Direction(a, b)   │
+// │ x  = Distance(a, b)    │ Dupe: Vector2.Distance(a, b)
+// │ xy = Middle(a, b)      │
+// │ b  = DistHack(a, b, r) │
+// ╰────────────────────────╯
 // ╭──────────────────────╮
 // │ VECTOR3          XYZ │
 // ┝━━━━━━━━━━━━━━━━━━━━━━┥
@@ -38,22 +37,74 @@ public static class KUtil
     /// <returns>Distance</returns>
     public static float Distance(float a, float b)
     {
-        return Mathf.Abs(a - b);
+        float aMinusB = a - b; // Get the direction vector from a to b
+        //return aMinusB < 0 ? -1 * aMinusB : aMinusB; // How Abs() is made
+        return Mathf.Abs(aMinusB); // If negative, flip it, else return as is
     }
+
+    /// <summary>
+    /// [L]inearly Int[erp]olate between min and max, based on t:0-1.
+    /// </summary>
+    /// <param name="min">Min</param>
+    /// <param name="max">Max</param>
+    /// <param name="t"></param>
+    /// <returns>Mix</returns>
+    public static float Lerp(float min, float max, float t)
+        // Example values:         2        3       0.5
+    {
+        float tFlipped = 1f - t; // flips t.  ie. (1 = 0), (0 = 1)
+        float minMix = min * tFlipped; // Decrease (min->0) as (t) increases.  ie. (2 * 0.5 = 1)
+        float maxMix = max * t; // Increase (0->max) as (t) increases.  ie. (3 * 0.5 = 1.5)
+        return minMix + maxMix; // Combine adjusted min/max values. (1 + 1.5 = 2.5)
+        // return (1f - t) * a + b * t; // Compact version
+    }
+
+    /// <summary>
+    /// Return a normalised value that corresponds to where v sits between min and max.
+    /// </summary>
+    /// <param name="min">Min</param>
+    /// <param name="max">Max</param>
+    /// <param name="v">Value</param>
+    /// <returns>Normalised value</returns>
+    public static float InvLerp(float min, float max, float v)
+        //                            25       75       50
+    {
+        float valMinusMin = v - min; // 50 - 25 = 25
+        float maxMinusMin = max - min; //  75 - 25 = 50
+        return valMinusMin / maxMinusMin; // 25 / 50 = 0.5
+        //return (v - a) / (b - a); // Compact version
+    }
+
+    /// <summary>
+    /// Find where v sits within the Input Range and rescale to fit the Output range.
+    /// Returning the rescaled value of that conversion.
+    /// </summary>
+    /// <param name="iMin">Input min</param>
+    /// <param name="iMax">Input max</param>
+    /// <param name="oMin">Output min</param>
+    /// <param name="oMax">Output max</param>
+    /// <param name="v">Input value</param>
+    /// <returns>Output value</returns>
+    public static float Remap(float iMin, float iMax, float oMin, float oMax, float v)
+    {
+        float t = InvLerp(iMin, iMax, v);
+        return Lerp(oMin, oMax, t);
+    }
+
 
     //////////////
     // VECTOR 2 //
     //////////////
 
     /// <summary>
-    /// Get direction from a to b
+    /// Get normalized direction from a to b
     /// </summary>
     /// <param name="a">Base</param>
     /// <param name="b">Target</param>
     /// <returns>Unit vector</returns>
     public static Vector2 Direction(Vector2 a, Vector2 b)
     {
-        return (b - a).normalized;
+        return (b - a).normalized; // Get direction vector from a to b, then reduce length to 1
     }
 
     // Dupe: Vector2.Distance(a, b)
@@ -71,7 +122,7 @@ public static class KUtil
     }
 
     /// <summary>
-    /// Get the midpoint between a and b
+    /// Get the midpoint position between a and b.
     /// </summary>
     /// <param name="a">Start</param>
     /// <param name="b">End</param>
@@ -92,21 +143,24 @@ public static class KUtil
     /// </summary>
     /// <remarks>
     /// It isn't ideal since we would also need to square everything
-    /// that is compared with the distance output.
+    /// that is compared with distSq (as we do with r), or Sqrt it before use, which negates
+    /// the purpose of the trick.
+    ///
+    /// But if you only need a radius trigger, then this is fine.
     /// </remarks>
     /// <param name="a">Start</param>
     /// <param name="b">End</param>
     /// <param name="r">Radius</param>
-    /// <param name="isInside"></param>
-    /// <returns>Distance</returns>
-    [Obsolete("Not really worth using but interesting nonetheless.")]
-    public static float DistHack(Vector2 a, Vector2 b, float r, out bool isInside)
+    /// <returns>True when b is within a's radius</returns>
+    [Obsolete("Not really worth using except in performance critical situations.")]
+    public static bool DistHack(Vector2 a, Vector2 b, float r)
     {
-        Vector2 disp = b - a;
-        float distSq = disp.x * disp.x + disp.y * disp.y; // No Sqrt() here
-        float radiusSq = r * r; // Square radius to avoid Sqrting distance
-        isInside = distSq < radiusSq;
-        return distSq;
+        Vector2 disp = b - a; // Get the vector from a to b
+
+        //float distSq = disp.x * disp.x + disp.y * disp.y;
+        float dispSq = disp.sqrMagnitude; // Same as above ^
+        // Normally we would Sqrt() this squared displacement to get an accurate distance
+        return dispSq < r * r; // Square radius to avoid Sqrting distance
     }
 
     //////////////
@@ -123,7 +177,8 @@ public static class KUtil
     public static float Distance(Vector3 a, Vector3 b)
     {
         Vector3 p = b - a;
+
         // return Mathf.Sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
-        return p.magnitude;
+        return p.magnitude;  // Same as above ^
     }
 }

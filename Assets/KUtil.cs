@@ -50,7 +50,7 @@ public static class KUtil
     /// <param name="t"></param>
     /// <returns>Mix</returns>
     public static float Lerp(float min, float max, float t)
-        // Example values:         2        3       0.5
+        // Example values:          2          3        0.5
     {
         float tFlipped = 1f - t; // flips t.  ie. (1 = 0), (0 = 1)
         float minMix = min * tFlipped; // Decrease (min->0) as (t) increases.  ie. (2 * 0.5 = 1)
@@ -161,6 +161,23 @@ public static class KUtil
         float dispSq = disp.sqrMagnitude; // Same as above ^
         // Normally we would Sqrt() this squared displacement to get an accurate distance
         return dispSq < r * r; // Square radius to avoid Sqrting distance
+    }
+
+    /// <summary>
+    /// Compare 2 angles
+    /// </summary>
+    /// <remarks>
+    /// b must be normalised to yield the correct result.<br/>
+    /// 1: Identical<br/>
+    /// -1: Opposite<br/>
+    /// 0: Perpendicular<br/>
+    /// </remarks>
+    /// <param name="a">Angle A</param>
+    /// <param name="b">Angle B</param>
+    /// <returns>Dot Product</returns>
+    public static float Dot(Vector2 a, Vector2 b)
+    {
+        return a.x * b.x + a.y * b.y;
     }
 
     //////////////

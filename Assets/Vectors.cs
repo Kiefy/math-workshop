@@ -21,232 +21,30 @@ public class Vectors : MonoBehaviour
     private readonly Color darkYellowColor = new Color(0.5f, 0.45f, 0.01f);
     private readonly Color darkCyanColor = new Color(0f, 0.5f, 0.5f);
 
+    private void Start()
+    {
+        FloatExamples();
+        Vector2Functions();
+    }
 
     private void OnDrawGizmos()
     {
-        // Color styles
-        GUIStyle redStyle = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
-        GUIStyle greenStyle = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
-        GUIStyle blueStyle = new GUIStyle {normal = {textColor = new Color(0.22f, 0.6f, 1f)}};
-        GUIStyle yellowStyle = new GUIStyle {normal = {textColor = Color.yellow}};
-        GUIStyle cyanStyle = new GUIStyle {normal = {textColor = Color.cyan}};
-        GUIStyle whiteStyle = new GUIStyle {normal = {textColor = Color.white}};
-        GUIStyle grayStyle = new GUIStyle {normal = {textColor = Color.gray}};
-        GUIStyle blackStyle = new GUIStyle {normal = {textColor = Color.black}};
-
         // Positions
         Vector2 origin = Vector2.zero;
         Vector2 player = transform.position;
         Vector2 target = targetTransform.position;
 
-
-        ////////////
-        // Origin //
-        ////////////
-
-        // Draw X axis line
-        Vector3 left = Vector3.left * 100f;
-        Vector3 right = Vector3.right * 100f;
-        Handles.DrawBezier(left, right, left, right, darkRedColor, null, 2f);
-        // Draw Y axis line
-        Vector3 up = Vector3.up * 100f;
-        Vector3 down = Vector3.down * 100f;
-        Handles.DrawBezier(up, down, up, down, darkGreenColor, null, 2f);
-        // Draw Z axis line
-        Vector3 forward = Vector3.forward * 100f;
-        Vector3 back = Vector3.back * 100f;
-        Handles.DrawBezier(forward, back, forward, back, darkBlueColor, null, 2f);
-
-        // Draw Origin unit circle
-        Handles.color = new Color(1f, 1f, 1f, 0.2f);
-        Handles.DrawWireDisc(origin, Vector3.forward, 1f, 2f);
-
-
-        // Axis Line markers
-        for (int i = 1; i < MARKER_COUNT + 1; i++)
-        {
-            if (i % 10 == 0)
-            {
-                Handles.DrawBezier(
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.1f),
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.1f),
-                    redColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.1f),
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.1f),
-                    redColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.1f, i * 0.1f),
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.1f, i * 0.1f),
-                    greenColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.1f, i * -0.1f),
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.1f, i * -0.1f),
-                    greenColor, null, 4f
-                );
-            }
-            else
-            {
-                Handles.DrawBezier(
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.05f),
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.05f),
-                    redColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.05f),
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.05f),
-                    redColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.05f, i * 0.1f),
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.05f, i * 0.1f),
-                    greenColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.05f, i * -0.1f),
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.05f, i * -0.1f),
-                    greenColor, null, 2f
-                );
-            }
-        }
-
-
-        //Draw axis number labels
-        for (int i = 1; i <= MARKER_COUNT / (MARKER_COUNT / 2); i++)
-        {
-            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), redStyle);
-        }
-
-        for (int i = -(MARKER_COUNT / (MARKER_COUNT / 2)); i < 0; i++)
-        {
-            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), redStyle);
-        }
-
-        /////////////////////
-        // Origin To Point //
-        /////////////////////
-
-        // Draw lines from origin to player. separated at unit vector
-        Vector2 opUnitVector = player.normalized;
-        Handles.DrawBezier(origin, opUnitVector, origin, opUnitVector, Color.white, null, 4f);
-        Handles.DrawBezier(opUnitVector, player, opUnitVector, player, Color.gray, null, 2f);
-
-        // Draw unit vector angle in degrees label
-        float playerAngle = Vector2.Angle(opUnitVector, Vector2.up);
-        Handles.Label(opUnitVector / 2, playerAngle.ToString("F1") + "°", whiteStyle);
-
-        // Draw Perpendicularity lines
-        Vector2 playerX = new Vector2(player.x, 0);
-        Vector2 playerY = new Vector2(0, player.y);
-        Handles.DrawBezier(player, playerX, player, playerX, darkRedColor, null, 2f);
-        Handles.DrawBezier(player, playerY, player, playerY, darkGreenColor, null, 2f);
-
-        // Draw Perpendicularity numbers
-        const float OFFSET01 = 0.1f;
-        Handles.Label(new Vector2(OFFSET01 + player.x, 0), player.x.ToString("F2"), redStyle);
-        Handles.Label(new Vector2(OFFSET01, player.y), player.y.ToString("F2"), greenStyle);
-
-        // Draw length label, midway between o and p
-        Vector2 originPlayerMiddle = KUtil.Middle(origin, player);
-        float originPlayerDistance = Vector2.Distance(origin, player);
-        Handles.Label(originPlayerMiddle, originPlayerDistance.ToString("F2"), grayStyle);
-
-        // Draw p coords label
-        const float OFFSET025 = 0.25f;
-        Vector2 playerOffsetX = new Vector2(player.x + OFFSET01, player.y - OFFSET01);
-        Vector2 playerOffsetY = new Vector2(player.x + OFFSET01, player.y - OFFSET025);
-        Handles.Label(playerOffsetX, "X: " + player.x.ToString("F2"), redStyle);
-        Handles.Label(playerOffsetY, "Y: " + player.y.ToString("F2"), greenStyle);
-
-        /////////////////////
-        // Point to Target //
-        /////////////////////
-
-        // Draw Unit circle
-        Handles.color = darkYellowColor;
-        Handles.DrawWireDisc(player, Vector3.forward, 1f, 2f);
-
-        // Draw lines from player to target. separated at unit vector
-        Vector2 ptUnitVector = KUtil.Direction(player, target);
-        Vector2 ptUnitVectorPos = player + ptUnitVector;
-        Handles.DrawBezier(player, ptUnitVectorPos, player, ptUnitVectorPos, Color.white, null, 4f);
-        Handles.DrawBezier(ptUnitVectorPos, target, ptUnitVectorPos, target, Color.gray, null, 2f);
-
-        // Draw player to target angle label
-        float ptAngle = Vector2.Angle(ptUnitVector, Vector2.up);
-        Handles.Label(player + ptUnitVector / 2, ptAngle.ToString("F1") + "°", whiteStyle);
-
-        // Draw Target length label, midway between p and t
-        Vector2 playerTargetMiddlePosition = KUtil.Middle(player, target);
-        float playerTargetDistance = Vector2.Distance(player, target);
-        Handles.Label(playerTargetMiddlePosition, playerTargetDistance.ToString("F2"), grayStyle);
-
-        // Draw Target coords label
-        Vector2 targetOffsetX = new Vector2(target.x + OFFSET01, target.y - OFFSET01);
-        Vector2 targetOffsetY = new Vector2(target.x + OFFSET01, target.y - OFFSET025);
-        Handles.Label(targetOffsetX, "X: " + target.x.ToString("F2"), redStyle);
-        Handles.Label(targetOffsetY, "Y: " + target.y.ToString("F2"), greenStyle);
-
-        // ╭───────────────────╮
-        // │ Traveling spheres │
-        // ╰───────────────────╯
-        if (loop && !jump && offsetP < originPlayerDistance)
-        {
-            offsetP += speed;
-            Handles.color = Color.Lerp(redColor, greenColor, offsetP / originPlayerDistance);
-            Vector2 originPlayerOffset = opUnitVector * offsetP;
-            Handles.DrawSolidDisc(originPlayerOffset, Vector3.forward, 0.1f);
-        }
-        else if (loop && !jump && offsetP > originPlayerDistance)
-        {
-            offsetP = 0f;
-            jump = true;
-        }
-
-        if (loop && jump && offsetT < playerTargetDistance)
-        {
-            offsetT += speed;
-            Handles.color = Color.Lerp(greenColor, blueColor, offsetT / playerTargetDistance);
-            Vector2 playerTargetOffset = player + ptUnitVector * offsetT;
-            Handles.DrawSolidDisc(playerTargetOffset, Vector3.forward, 0.1f);
-        }
-        else if (loop && jump && offsetT > playerTargetDistance)
-        {
-            offsetT = 0f;
-            jump = false;
-        }
+        OriginGui(origin);
+        OriginToPlayerGui(origin, player);
+        PlayerToTargetGui(player, target);
+        TravelingSphere(origin, player, target);
     }
 
-    private void Start()
+    // ╭───────╮
+    // │ Float │
+    // ╰───────╯
+    private static void FloatExamples()
     {
-        Vector2 a = new Vector2(-2f, 3f);
-        Vector2 b = new Vector2(1f, 2f);
-
         "╭────────┰─────────────────────────────────────╮".Log();
         "│  ┐ ┬╮  ┃  ╭╮ ╭╮ ╭╮ ╷  ╭╮ ┌╮   ╭╴ ╷  ╭╮ ╭╮╶┬╴ │".Log();
         "│  │ ││  ┃  ╰╮ │  ├┤ │  ├┤ ├┤   ├╴ │  ││ ├┤ │  │".Log();
@@ -323,6 +121,15 @@ public class Vectors : MonoBehaviour
         ("Mathf.Clamp( 1,    0, 1) =  " /* 1 */ + Mathf.Clamp(1f, 0, 1)).Log();
         ("Mathf.Clamp( 1.5,  0, 1) =  " /* 1 */ + Mathf.Clamp(1.5f, 0, 1)).Log();
         ("Mathf.Clamp( 1.5,  0, 2) =  " /* 1.5 */ + Mathf.Clamp(1.5f, 0, 2)).Log();
+    }
+
+    // ╭─────────╮
+    // │ Vector2 │
+    // ╰─────────╯
+    private static void Vector2Functions()
+    {
+        Vector2 a = new Vector2(-2f, 3f);
+        Vector2 b = new Vector2(1f, 2f);
 
         "╭─────────┰───────────────────────╮".Log();
         "│  ╭╮ ┬╮  ┃  ╷╷ ╭╴ ╭╮╶┬╴╭╮ ┌╮ ╭╮  │".Log();
@@ -369,5 +176,234 @@ public class Vectors : MonoBehaviour
         "╭────────────────────┰──────────────────────────────╮".Log();
         "│ Lerp(a, b, t) ┃ Blend from a to b based on t │".Log();
         "╰────────────────────┸──────────────────────────────╯".Log();
+    }
+
+
+    // ╭────────╮
+    // │ Origin │
+    // ╰────────╯
+    private void OriginGui(Vector2 origin)
+    {
+        // Draw X axis line
+        Vector3 left = Vector3.left * 100f;
+        Vector3 right = Vector3.right * 100f;
+        Handles.DrawBezier(left, right, left, right, darkRedColor, null, 2f);
+        // Draw Y axis line
+        Vector3 up = Vector3.up * 100f;
+        Vector3 down = Vector3.down * 100f;
+        Handles.DrawBezier(up, down, up, down, darkGreenColor, null, 2f);
+        // Draw Z axis line
+        Vector3 forward = Vector3.forward * 100f;
+        Vector3 back = Vector3.back * 100f;
+        Handles.DrawBezier(forward, back, forward, back, darkBlueColor, null, 2f);
+
+        // Draw Origin unit circle
+        Handles.color = new Color(1f, 1f, 1f, 0.2f);
+        Handles.DrawWireDisc(origin, Vector3.forward, 1f, 2f);
+
+        // Draw 2D Axis Line markers
+        for (int i = 1; i < MARKER_COUNT + 1; i++)
+        {
+            if (i % 10 == 0)
+            {
+                Handles.DrawBezier(
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.1f),
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.1f),
+                    redColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.1f),
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.1f),
+                    redColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.1f, i * 0.1f),
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.1f, i * 0.1f),
+                    greenColor, null, 4f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.1f, i * -0.1f),
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.1f, i * -0.1f),
+                    greenColor, null, 4f
+                );
+            }
+            else
+            {
+                Handles.DrawBezier(
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.05f),
+                    new Vector2(i * 0.1f, 0f),
+                    new Vector2(i * 0.1f, 0.05f),
+                    redColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.05f),
+                    new Vector2(-i * 0.1f, 0f),
+                    new Vector2(-i * 0.1f, -0.05f),
+                    redColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.05f, i * 0.1f),
+                    new Vector2(0f, i * 0.1f),
+                    new Vector2(-0.05f, i * 0.1f),
+                    greenColor, null, 2f
+                );
+
+                Handles.DrawBezier(
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.05f, i * -0.1f),
+                    new Vector2(0f, i * -0.1f),
+                    new Vector2(0.05f, i * -0.1f),
+                    greenColor, null, 2f
+                );
+            }
+        }
+
+        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
+
+        //Draw positive x axis number labels
+        for (int i = 1; i <= MARKER_COUNT / (MARKER_COUNT / 2); i++)
+        {
+            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), styleX);
+        }
+
+        //Draw negative x axis number labels
+        for (int i = -(MARKER_COUNT / (MARKER_COUNT / 2)); i < 0; i++)
+        {
+            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), styleX);
+        }
+    }
+
+    // ╭──────────────────╮
+    // │ Origin to Player │
+    // ╰──────────────────╯
+    private void OriginToPlayerGui(Vector2 origin, Vector2 player)
+    {
+        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
+        GUIStyle styleY = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
+        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
+        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
+
+        // Draw lines from origin to player. separated at unit vector
+        Vector2 opUnitVector = player.normalized;
+        Handles.DrawBezier(origin, opUnitVector, origin, opUnitVector, Color.white, null, 4f);
+        Handles.DrawBezier(opUnitVector, player, opUnitVector, player, Color.gray, null, 2f);
+
+        // Draw unit vector angle in degrees label
+        float playerAngle = Vector2.Angle(opUnitVector, Vector2.up);
+        Handles.Label(opUnitVector / 2, playerAngle.ToString("F1") + "°", angleLabel);
+
+        // Draw Perpendicularity lines
+        Vector2 playerX = new Vector2(player.x, 0);
+        Vector2 playerY = new Vector2(0, player.y);
+        Handles.DrawBezier(player, playerX, player, playerX, darkRedColor, null, 2f);
+        Handles.DrawBezier(player, playerY, player, playerY, darkGreenColor, null, 2f);
+
+        // Draw Perpendicularity numbers
+        Handles.Label(new Vector2(0.1f + player.x, 0), player.x.ToString("F2"), styleX);
+        Handles.Label(new Vector2(0.1f, player.y), player.y.ToString("F2"), styleY);
+
+        // Draw length label, midway between o and p
+        Vector2 originPlayerMiddle = KUtil.Middle(origin, player);
+        float originPlayerDistance = Vector2.Distance(origin, player);
+        Handles.Label(originPlayerMiddle, originPlayerDistance.ToString("F2"), lengthLabel);
+
+        // Draw p coords label
+        Vector2 playerOffsetX = new Vector2(player.x + 0.1f, player.y - 0.1f);
+        Vector2 playerOffsetY = new Vector2(player.x + 0.1f, player.y - 0.25f);
+        Handles.Label(playerOffsetX, "X: " + player.x.ToString("F2"), styleX);
+        Handles.Label(playerOffsetY, "Y: " + player.y.ToString("F2"), styleY);
+    }
+
+    // ╭──────────────────╮
+    // │ Player to Target │
+    // ╰──────────────────╯
+    private void PlayerToTargetGui(Vector2 player, Vector2 target)
+    {
+        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
+        GUIStyle styleY = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
+        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
+        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
+        GUIStyle dotLabel = new GUIStyle {normal = {textColor = Color.yellow}};
+
+        // Draw Unit circle
+        Handles.color = darkYellowColor;
+        Handles.DrawWireDisc(player, Vector3.forward, 1f, 2f);
+
+        // Draw lines from player to target. separated at unit vector
+        Vector2 ptUnitVector = KUtil.Direction(player, target);
+        Vector2 ptUnitVectorPos = player + ptUnitVector;
+        Handles.DrawBezier(player, ptUnitVectorPos, player, ptUnitVectorPos, Color.white, null, 4f);
+        Handles.DrawBezier(ptUnitVectorPos, target, ptUnitVectorPos, target, Color.gray, null, 2f);
+
+        // Draw player to target angle label
+        float ptAngle = Vector2.SignedAngle(ptUnitVector, player.normalized);
+        Vector2 ptDir = KUtil.Direction(player, target);
+        Vector2 place = player + ptUnitVector / 2;
+        Vector2 start = KUtil.Direction(Vector2.zero, player);
+        Handles.Label(place, "Ang: " + ptAngle.ToString("F1") + "°", angleLabel);
+        Handles.Label(place + Vector2.down / 7, "Dot: " + KUtil.Dot(start, ptDir).ToString("F2"), dotLabel);
+
+
+        // Draw Target length label, midway between p and t
+        Vector2 playerTargetMiddlePosition = KUtil.Middle(player, target);
+        float playerTargetDistance = Vector2.Distance(player, target);
+        Handles.Label(playerTargetMiddlePosition, playerTargetDistance.ToString("F2"), lengthLabel);
+
+        // Draw Target coords label
+        Vector2 targetOffsetX = new Vector2(target.x + 0.1f, target.y - 0.1f);
+        Vector2 targetOffsetY = new Vector2(target.x + 0.1f, target.y - 0.25f);
+        Handles.Label(targetOffsetX, "X: " + target.x.ToString("F2"), styleX);
+        Handles.Label(targetOffsetY, "Y: " + target.y.ToString("F2"), styleY);
+    }
+
+    // ╭──────────────────╮
+    // │ Traveling sphere │
+    // ╰──────────────────╯
+    private void TravelingSphere(Vector2 origin, Vector2 player, Vector2 target)
+    {
+        float opDist = Vector2.Distance(origin, player);
+        float ptDist = Vector2.Distance(player, target);
+
+        if (loop && !jump && offsetP < opDist)
+        {
+            offsetP += speed;
+            Handles.color = Color.Lerp(redColor, greenColor, offsetP / opDist);
+            Vector2 originPlayerOffset = player.normalized * offsetP;
+            Handles.DrawSolidDisc(originPlayerOffset, Vector3.forward, 0.1f);
+        }
+        else if (loop && !jump && offsetP > opDist)
+        {
+            offsetP = 0f;
+            jump = true;
+        }
+
+        if (loop && jump && offsetT < ptDist)
+        {
+            offsetT += speed;
+            Handles.color = Color.Lerp(greenColor, blueColor, offsetT / ptDist);
+            Vector2 playerTargetOffset = player + KUtil.Direction(player, target) * offsetT;
+            Handles.DrawSolidDisc(playerTargetOffset, Vector3.forward, 0.1f);
+        }
+        else if (loop && jump && offsetT > ptDist)
+        {
+            offsetT = 0f;
+            jump = false;
+        }
     }
 }

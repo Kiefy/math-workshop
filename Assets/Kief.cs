@@ -1,10 +1,13 @@
 using System;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
 
+#endif
 // ╭──────────────────────────────────────╮
 // │ FLOAT                              X │
 // ┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
-// │ x = Distance(a, b)                   │ Useless?
+// │ x = Distance(a, b)                   │ Useless?  Dupe: Mathf.Abs(a-b)
 // │ v = Lerp(min, max, t)                │
 // │ t = InvLerp(min, max, v)             │
 // │ t = Remap(iMin, iMax, oMin, oMax, v) │
@@ -23,7 +26,7 @@ using UnityEngine;
 // │ xyz = Distance(a, b) │ Dupe: Vector3.Distance(a, b)
 // ╰──────────────────────╯
 
-public static class KUtil
+public static class Kief
 {
     ///////////
     // FLOAT //
@@ -180,6 +183,17 @@ public static class KUtil
         return a.x * b.x + a.y * b.y;
     }
 
+    public static void Line(float sX, float sY, float eX, float eY, Color color, float thickness)
+    {
+#if UNITY_EDITOR
+        Handles.DrawBezier(
+            new Vector2(sX, sY), new Vector2(eX, eY),
+            new Vector2(sX, sY), new Vector2(eX, eY),
+            color, null, thickness
+        );
+#endif
+    }
+
     //////////////
     // VECTOR 3 //
     //////////////
@@ -196,6 +210,6 @@ public static class KUtil
         Vector3 p = b - a;
 
         // return Mathf.Sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
-        return p.magnitude;  // Same as above ^
+        return p.magnitude; // Same as above ^
     }
 }

@@ -1,9 +1,11 @@
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
 
+#endif
 public class Vectors : MonoBehaviour
 {
-    public bool loop;
     [Range(0f, 0.02f)] public float speed;
     private const int MARKER_COUNT = 20;
 
@@ -12,14 +14,18 @@ public class Vectors : MonoBehaviour
     private float offsetT;
     private bool jump;
 
-    private readonly Color redColor = new Color(1f, 0.26f, 0.26f);
-    private readonly Color greenColor = new Color(0.36f, 1f, 0.32f);
-    private readonly Color blueColor = new Color(0.22f, 0.6f, 1f);
-    private readonly Color darkRedColor = new Color(0.5f, 0.14f, 0.14f);
-    private readonly Color darkGreenColor = new Color(0.18f, 0.5f, 0.16f);
-    private readonly Color darkBlueColor = new Color(0.13f, 0.29f, 0.5f);
-    private readonly Color darkYellowColor = new Color(0.5f, 0.45f, 0.01f);
-    private readonly Color darkCyanColor = new Color(0f, 0.5f, 0.5f);
+    private float[] stepLengths;
+    private float fullLength;
+    private float routePos;
+
+    private readonly Color red = new Color(1f, 0.26f, 0.26f);
+    private readonly Color green = new Color(0.36f, 1f, 0.32f);
+    private readonly Color blue = new Color(0.22f, 0.6f, 1f);
+    private readonly Color darkRed = new Color(0.5f, 0.14f, 0.14f);
+    private readonly Color darkGreen = new Color(0.18f, 0.5f, 0.16f);
+    private readonly Color darkBlue = new Color(0.13f, 0.29f, 0.5f);
+    private readonly Color darkYellow = new Color(0.5f, 0.45f, 0.01f);
+    private readonly Color darkCyan = new Color(0f, 0.5f, 0.5f);
 
     private void Start()
     {
@@ -29,7 +35,6 @@ public class Vectors : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        // Positions
         Vector2 origin = Vector2.zero;
         Vector2 player = transform.position;
         Vector2 target = targetTransform.position;
@@ -37,7 +42,9 @@ public class Vectors : MonoBehaviour
         OriginGui(origin);
         OriginToPlayerGui(origin, player);
         PlayerToTargetGui(player, target);
-        TravelingSphere(origin, player, target);
+
+        Vector2[] points = {origin, player, target};
+        TravelingSphere(points, red, green);
     }
 
     // ╭───────╮
@@ -172,30 +179,28 @@ public class Vectors : MonoBehaviour
         (a + b).Log();
         (a + b / 2).Log();
         ("a + (b - a) / 2    = " /* (-0.5, 2.5) */ + (a + (b - a) / 2)).Log();
-        ("KUtil.Middle(a, b) = " /* (-0.5, 2.5) */ + KUtil.Middle(a, b)).Log();
-        "╭────────────────────┰──────────────────────────────╮".Log();
+        ("KUtil.Middle(a, b) = " /* (-0.5, 2.5) */ + Kief.Middle(a, b)).Log();
+        "╭───────────────┰──────────────────────────────╮".Log();
         "│ Lerp(a, b, t) ┃ Blend from a to b based on t │".Log();
-        "╰────────────────────┸──────────────────────────────╯".Log();
+        "╰───────────────┸──────────────────────────────╯".Log();
     }
-
 
     // ╭────────╮
     // │ Origin │
     // ╰────────╯
     private void OriginGui(Vector2 origin)
     {
-        // Draw X axis line
+#if UNITY_EDITOR
+        // Draw axis lines
         Vector3 left = Vector3.left * 100f;
         Vector3 right = Vector3.right * 100f;
-        Handles.DrawBezier(left, right, left, right, darkRedColor, null, 2f);
-        // Draw Y axis line
+        Handles.DrawBezier(left, right, left, right, darkRed, null, 2f);
         Vector3 up = Vector3.up * 100f;
         Vector3 down = Vector3.down * 100f;
-        Handles.DrawBezier(up, down, up, down, darkGreenColor, null, 2f);
-        // Draw Z axis line
+        Handles.DrawBezier(up, down, up, down, darkGreen, null, 2f);
         Vector3 forward = Vector3.forward * 100f;
         Vector3 back = Vector3.back * 100f;
-        Handles.DrawBezier(forward, back, forward, back, darkBlueColor, null, 2f);
+        Handles.DrawBezier(forward, back, forward, back, darkBlue, null, 2f);
 
         // Draw Origin unit circle
         Handles.color = new Color(1f, 1f, 1f, 0.2f);
@@ -206,87 +211,32 @@ public class Vectors : MonoBehaviour
         {
             if (i % 10 == 0)
             {
-                Handles.DrawBezier(
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.1f),
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.1f),
-                    redColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.1f),
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.1f),
-                    redColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.1f, i * 0.1f),
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.1f, i * 0.1f),
-                    greenColor, null, 4f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.1f, i * -0.1f),
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.1f, i * -0.1f),
-                    greenColor, null, 4f
-                );
+                Kief.Line(i * 0.1f, 0f, i * 0.1f, 0.1f, red, 4f);
+                Kief.Line(-i * 0.1f, 0f, -i * 0.1f, -0.1f, red, 4f);
+                Kief.Line(0f, i * 0.1f, -0.1f, i * 0.1f, green, 4f);
+                Kief.Line(0f, i * -0.1f, 0.1f, i * -0.1f, green, 4f);
             }
             else
             {
-                Handles.DrawBezier(
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.05f),
-                    new Vector2(i * 0.1f, 0f),
-                    new Vector2(i * 0.1f, 0.05f),
-                    redColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.05f),
-                    new Vector2(-i * 0.1f, 0f),
-                    new Vector2(-i * 0.1f, -0.05f),
-                    redColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.05f, i * 0.1f),
-                    new Vector2(0f, i * 0.1f),
-                    new Vector2(-0.05f, i * 0.1f),
-                    greenColor, null, 2f
-                );
-
-                Handles.DrawBezier(
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.05f, i * -0.1f),
-                    new Vector2(0f, i * -0.1f),
-                    new Vector2(0.05f, i * -0.1f),
-                    greenColor, null, 2f
-                );
+                Kief.Line(i * 0.1f, 0f, i * 0.1f, 0.05f, red, 2f);
+                Kief.Line(-i * 0.1f, 0f, -i * 0.1f, -0.05f, red, 2f);
+                Kief.Line(0f, i * 0.1f, -0.05f, i * 0.1f, green, 2f);
+                Kief.Line(0f, i * -0.1f, 0.05f, i * -0.1f, green, 2f);
             }
         }
 
-        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
-
-        //Draw positive x axis number labels
+        // Draw 2D Axis Line numbers
+        GUIStyle styleX = new GUIStyle {normal = {textColor = red}};
         for (int i = 1; i <= MARKER_COUNT / (MARKER_COUNT / 2); i++)
-        {
-            Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), styleX);
-        }
-
-        //Draw negative x axis number labels
+            Handles.Label(new Vector3(i, 0.3f, 0f), i.ToString("F0"), styleX);
         for (int i = -(MARKER_COUNT / (MARKER_COUNT / 2)); i < 0; i++)
-        {
             Handles.Label(new Vector3(i, -0.1f, 0f), i.ToString("F0"), styleX);
-        }
+        GUIStyle styleY = new GUIStyle {normal = {textColor = green}};
+        for (int i = 1; i <= MARKER_COUNT / (MARKER_COUNT / 2); i++)
+            Handles.Label(new Vector3(-0.2f, i + 0.05f, 0f), i.ToString("F0"), styleY);
+        for (int i = -(MARKER_COUNT / (MARKER_COUNT / 2)); i < 0; i++)
+            Handles.Label(new Vector3(0.2f, i + 0.05f, 0f), i.ToString("F0"), styleY);
+#endif
     }
 
     // ╭──────────────────╮
@@ -294,40 +244,42 @@ public class Vectors : MonoBehaviour
     // ╰──────────────────╯
     private void OriginToPlayerGui(Vector2 origin, Vector2 player)
     {
+#if UNITY_EDITOR
         GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
         GUIStyle styleY = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
-        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
-        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
-
-        // Draw lines from origin to player. separated at unit vector
         Vector2 opUnitVector = player.normalized;
+
+        // Draw lines from origin to player. meeting at unit boundary
         Handles.DrawBezier(origin, opUnitVector, origin, opUnitVector, Color.white, null, 4f);
         Handles.DrawBezier(opUnitVector, player, opUnitVector, player, Color.gray, null, 2f);
 
-        // Draw unit vector angle in degrees label
+        // Draw angle in degrees label at unit boundary
         float playerAngle = Vector2.Angle(opUnitVector, Vector2.up);
+        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
         Handles.Label(opUnitVector / 2, playerAngle.ToString("F1") + "°", angleLabel);
 
-        // Draw Perpendicularity lines
+        // Draw Perpendicular lines from zero xy to player
         Vector2 playerX = new Vector2(player.x, 0);
+        Handles.DrawBezier(player, playerX, player, playerX, darkRed, null, 2f);
         Vector2 playerY = new Vector2(0, player.y);
-        Handles.DrawBezier(player, playerX, player, playerX, darkRedColor, null, 2f);
-        Handles.DrawBezier(player, playerY, player, playerY, darkGreenColor, null, 2f);
+        Handles.DrawBezier(player, playerY, player, playerY, darkGreen, null, 2f);
 
         // Draw Perpendicularity numbers
         Handles.Label(new Vector2(0.1f + player.x, 0), player.x.ToString("F2"), styleX);
         Handles.Label(new Vector2(0.1f, player.y), player.y.ToString("F2"), styleY);
 
         // Draw length label, midway between o and p
-        Vector2 originPlayerMiddle = KUtil.Middle(origin, player);
+        Vector2 originPlayerMiddle = Kief.Middle(origin, player);
         float originPlayerDistance = Vector2.Distance(origin, player);
+        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
         Handles.Label(originPlayerMiddle, originPlayerDistance.ToString("F2"), lengthLabel);
 
         // Draw p coords label
         Vector2 playerOffsetX = new Vector2(player.x + 0.1f, player.y - 0.1f);
-        Vector2 playerOffsetY = new Vector2(player.x + 0.1f, player.y - 0.25f);
         Handles.Label(playerOffsetX, "X: " + player.x.ToString("F2"), styleX);
+        Vector2 playerOffsetY = new Vector2(player.x + 0.1f, player.y - 0.25f);
         Handles.Label(playerOffsetY, "Y: " + player.y.ToString("F2"), styleY);
+#endif
     }
 
     // ╭──────────────────╮
@@ -335,75 +287,96 @@ public class Vectors : MonoBehaviour
     // ╰──────────────────╯
     private void PlayerToTargetGui(Vector2 player, Vector2 target)
     {
-        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
-        GUIStyle styleY = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
-        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
-        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
-        GUIStyle dotLabel = new GUIStyle {normal = {textColor = Color.yellow}};
+#if UNITY_EDITOR
+        Vector2 ptUnitVector = Kief.Direction(player, target);
 
         // Draw Unit circle
-        Handles.color = darkYellowColor;
+        Handles.color = darkYellow;
         Handles.DrawWireDisc(player, Vector3.forward, 1f, 2f);
 
         // Draw lines from player to target. separated at unit vector
-        Vector2 ptUnitVector = KUtil.Direction(player, target);
         Vector2 ptUnitVectorPos = player + ptUnitVector;
         Handles.DrawBezier(player, ptUnitVectorPos, player, ptUnitVectorPos, Color.white, null, 4f);
         Handles.DrawBezier(ptUnitVectorPos, target, ptUnitVectorPos, target, Color.gray, null, 2f);
 
         // Draw player to target angle label
-        float ptAngle = Vector2.SignedAngle(ptUnitVector, player.normalized);
-        Vector2 ptDir = KUtil.Direction(player, target);
         Vector2 place = player + ptUnitVector / 2;
-        Vector2 start = KUtil.Direction(Vector2.zero, player);
+        float ptAngle = Vector2.SignedAngle(ptUnitVector, player.normalized);
+        GUIStyle angleLabel = new GUIStyle {normal = {textColor = Color.white}};
         Handles.Label(place, "Ang: " + ptAngle.ToString("F1") + "°", angleLabel);
-        Handles.Label(place + Vector2.down / 7, "Dot: " + KUtil.Dot(start, ptDir).ToString("F2"), dotLabel);
+        Vector2 start = Kief.Direction(Vector2.zero, player);
+        Vector2 ptDir = Kief.Direction(player, target);
+        GUIStyle dotLabel = new GUIStyle {normal = {textColor = Color.yellow}};
+        Handles.Label(place + Vector2.down / 7, "Dot: " + Kief.Dot(start, ptDir).ToString("F2"), dotLabel);
 
 
         // Draw Target length label, midway between p and t
-        Vector2 playerTargetMiddlePosition = KUtil.Middle(player, target);
+        Vector2 playerTargetMiddlePosition = Kief.Middle(player, target);
         float playerTargetDistance = Vector2.Distance(player, target);
+        GUIStyle lengthLabel = new GUIStyle {normal = {textColor = Color.gray}};
         Handles.Label(playerTargetMiddlePosition, playerTargetDistance.ToString("F2"), lengthLabel);
 
         // Draw Target coords label
         Vector2 targetOffsetX = new Vector2(target.x + 0.1f, target.y - 0.1f);
-        Vector2 targetOffsetY = new Vector2(target.x + 0.1f, target.y - 0.25f);
+        GUIStyle styleX = new GUIStyle {normal = {textColor = new Color(1f, 0.26f, 0.26f)}};
         Handles.Label(targetOffsetX, "X: " + target.x.ToString("F2"), styleX);
+        Vector2 targetOffsetY = new Vector2(target.x + 0.1f, target.y - 0.25f);
+        GUIStyle styleY = new GUIStyle {normal = {textColor = new Color(0.36f, 1f, 0.32f)}};
         Handles.Label(targetOffsetY, "Y: " + target.y.ToString("F2"), styleY);
+#endif
     }
 
     // ╭──────────────────╮
     // │ Traveling sphere │
     // ╰──────────────────╯
-    private void TravelingSphere(Vector2 origin, Vector2 player, Vector2 target)
+    private void TravelingSphere(IReadOnlyList<Vector2> points, Color startColor, Color endColor)
     {
-        float opDist = Vector2.Distance(origin, player);
-        float ptDist = Vector2.Distance(player, target);
-
-        if (loop && !jump && offsetP < opDist)
+#if UNITY_EDITOR
+        void RebuildRoutes()
         {
-            offsetP += speed;
-            Handles.color = Color.Lerp(redColor, greenColor, offsetP / opDist);
-            Vector2 originPlayerOffset = player.normalized * offsetP;
-            Handles.DrawSolidDisc(originPlayerOffset, Vector3.forward, 0.1f);
-        }
-        else if (loop && !jump && offsetP > opDist)
-        {
-            offsetP = 0f;
-            jump = true;
+            fullLength = 0;
+            stepLengths = new float[points.Count];
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                stepLengths[i] = Kief.Distance(points[i], points[i + 1]);
+                fullLength += stepLengths[i];
+            }
         }
 
-        if (loop && jump && offsetT < ptDist)
+        if (stepLengths == null || stepLengths.Length == 0) RebuildRoutes();
+        else
         {
-            offsetT += speed;
-            Handles.color = Color.Lerp(greenColor, blueColor, offsetT / ptDist);
-            Vector2 playerTargetOffset = player + KUtil.Direction(player, target) * offsetT;
-            Handles.DrawSolidDisc(playerTargetOffset, Vector3.forward, 0.1f);
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                float stepDistance = Kief.Distance(points[i], points[i + 1]);
+                if (stepLengths[i] == stepDistance) continue;
+                fullLength += stepDistance - stepLengths[i];
+                stepLengths[i] = stepDistance;
+            }
         }
-        else if (loop && jump && offsetT > ptDist)
+
+        float length = 0;
+        for (int i = 0; i < stepLengths.Length - 1; i++)
         {
-            offsetT = 0f;
-            jump = false;
+            if (routePos > fullLength) routePos = 0;
+            length += stepLengths[i];
+            if (!(length > routePos)) continue;
+            Handles.color = Color.Lerp(startColor, endColor, routePos / fullLength);
+            Vector2 dir = Kief.Direction(points[i], points[i + 1]);
+            float remap = Kief.Remap(length - stepLengths[i], length, 0f, stepLengths[i], routePos);
+            Handles.DrawSolidDisc(points[i] + dir * remap, Vector3.forward, 0.1f);
+            routePos += speed;
+            break;
         }
+#endif
+    }
+
+    private void DrawBasisVectors(Vector2 pos, Vector2 right, Vector2 up)
+    {
+        Gizmos.color = red;
+        Gizmos.DrawRay(pos, right);
+        Gizmos.color = green;
+        Gizmos.DrawRay(pos, up);
+        Gizmos.color = Color.white;
     }
 }

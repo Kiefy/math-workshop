@@ -196,6 +196,12 @@ public static class ExtensionMethods
         return Vector2.Distance(a, b);
     }
 
+    public static Vector2 ToWorld(this Transform localOrigin, Vector2 localPoint)
+    {
+        Vector2 x = localOrigin.right * localPoint.x;
+        Vector2 y = localOrigin.up * localPoint.y;
+        return (Vector2)localOrigin.position + x + y;
+    }
 
     //////////////
     // VECTOR 3 //

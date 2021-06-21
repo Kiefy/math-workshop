@@ -1,7 +1,8 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
+#if UNITY_EDITOR
+using UnityEditor;
 
+#endif
 public class BezierMachine : MonoBehaviour
 {
     public bool loop;
@@ -15,7 +16,7 @@ public class BezierMachine : MonoBehaviour
     public float controlLineThickness = 0.7f;
     [Range(0f, 1f)] public float controlLineOpacity = 0.7f;
 
-    [Range(0f, 0.1f)] public float constructJointRadius = 0.05f;
+    [Range(0f, 0.1f)] public float jointRadius = 0.05f;
     [Range(0f, 1f)] public float constructJointOpacity = 0.7f;
     public float constructLineThickness = 4f;
     [Range(0f, 1f)] public float constructLineOpacity = 0.7f;
@@ -45,106 +46,75 @@ public class BezierMachine : MonoBehaviour
         bezierColors[4] = Color.cyan;
         bezierColors[5] = Color.magenta;
 
-        if (loop && offset < 1f)
+        switch (loop)
         {
-            offset += speed / 10;
+            case true when offset < 1f:
+                offset += speed / 10;
+                break;
+            case true when offset > 1f:
+                offset = 0f;
+                lineRenderer.positionCount = 0;
+                break;
         }
-        else if (loop && offset > 1f)
+
+        Vector2[][] bTrees = new Vector2[bezierPoints.Length][];
+
+        if (bTrees[0] == null)
         {
-            offset = 0f;
-            lineRenderer.positionCount = 0;
-        }
-
-        Vector2[][] bezierTrees = new Vector2[bezierPoints.Length][];
-
-        if (bezierTrees[0] == null)
-        {
-            bezierTrees[0] = new Vector2[bezierPoints.Length];
-
-            for (int i = 0; i < bezierPoints.Length; i++)
-            {
-                bezierTrees[0][i] = bezierPoints[i].position;
-            }
+            bTrees[0] = new Vector2[bezierPoints.Length];
+            for (int i = 0; i < bezierPoints.Length; i++) bTrees[0][i] = bezierPoints[i].position;
         }
 
         // Main Loop
-        for (int i = 0; i < bezierTrees.Length; i++)
+        for (int i = 0; i < bTrees.Length; i++)
         {
             if (i == 0)
             {
-                for (int x = 0; x < bezierTrees[i].Length; x++)
+                for (int x = 0; x < bTrees[i].Length; x++)
                 {
-                    if (x < bezierTrees[i].Length - 1)
-                    {
-                        if (bezierTrees[i + 1] == null)
-                        {
-                            bezierTrees[i + 1] = new Vector2[bezierTrees[i].Length - 1];
-                        }
-
-                        bezierTrees[i + 1][x] =
-                            Vector2.Lerp(bezierTrees[i][x], bezierTrees[i][x + 1], offset);
-                        Handles.color = bezierColors[i % 6] * constructJointOpacity;
-
-                        Handles.DrawBezier(
-                            bezierTrees[i][x],
-                            bezierTrees[i][x + 1],
-                            bezierTrees[i][x],
-                            bezierTrees[i][x + 1],
-                            controlLineColor * controlLineOpacity, null, controlLineThickness
-                        );
-                        Handles.DrawSolidDisc(bezierTrees[i + 1][x], Vector3.forward, constructJointRadius);
-                    }
+                    if (x >= bTrees[i].Length - 1) continue;
+                    bTrees[i + 1] ??= new Vector2[bTrees[i].Length - 1];
+                    bTrees[i + 1][x] = Vector2.Lerp(bTrees[i][x], bTrees[i][x + 1], offset);
+#if UNITY_EDITOR
+                    Handles.color = bezierColors[i % 6] * constructJointOpacity;
+                    Handles.DrawBezier(bTrees[i][x], bTrees[i][x + 1], bTrees[i][x], bTrees[i][x + 1],
+                        controlLineColor * controlLineOpacity, null, controlLineThickness);
+                    Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointRadius);
+#endif
                 }
             }
-            else if (i < bezierTrees.Length - 1)
+            else if (i < bTrees.Length - 1)
             {
-                for (int x = 0; x < bezierTrees[i].Length; x++)
+                for (int x = 0; x < bTrees[i].Length; x++)
                 {
-                    if (x < bezierTrees[i].Length - 1)
+                    if (x >= bTrees[i].Length - 1) continue;
+                    bTrees[i + 1] ??= new Vector2[bTrees[i].Length - 1];
+                    bTrees[i + 1][x] = Vector2.Lerp(bTrees[i][x], bTrees[i][x + 1], offset);
+#if UNITY_EDITOR
+                    Handles.color = bezierColors[i % 6] * constructJointOpacity;
+                    Handles.DrawBezier(bTrees[i][x], bTrees[i][x + 1], bTrees[i][x], bTrees[i][x + 1],
+                        bezierColors[(i - 1) % 6] * constructLineOpacity, null, constructLineThickness);
+
+                    if (i != bTrees.Length - 2)
                     {
-                        if (bezierTrees[i + 1] == null)
-                        {
-                            bezierTrees[i + 1] = new Vector2[bezierTrees[i].Length - 1];
-                        }
-
-                        bezierTrees[i + 1][x] =
-                            Vector2.Lerp(bezierTrees[i][x], bezierTrees[i][x + 1], offset);
-                        Handles.color = bezierColors[i % 6] * constructJointOpacity;
-
-                        Handles.DrawBezier(
-                            bezierTrees[i][x],
-                            bezierTrees[i][x + 1],
-                            bezierTrees[i][x],
-                            bezierTrees[i][x + 1],
-                            bezierColors[(i - 1) % 6] * constructLineOpacity, null, constructLineThickness
-                        );
-
-                        if (i != bezierTrees.Length - 2)
-                        {
-                            Handles.DrawSolidDisc(bezierTrees[i + 1][x], Vector3.forward,
-                                constructJointRadius);
-                        }
-                        else
-                        {
-                            Handles.color = finalJointColor * finalJointOpacity;
-
-                            Handles.DrawSolidDisc(bezierTrees[i + 1][x], Vector3.forward, finalJointRadius);
-                        }
+                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointRadius);
                     }
+                    else
+                    {
+                        Handles.color = finalJointColor * finalJointOpacity;
+                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, finalJointRadius);
+                    }
+#endif
                 }
             }
         }
 
-        if (bezierTrees[bezierTrees.Length - 1] != null)
+        if (bTrees[bTrees.Length - 1] != null)
         {
             lineRenderer = GetComponent<LineRenderer>();
             lineRenderer.startWidth = 0.08f;
             lineRenderer.endWidth = 0.02f;
-            if (offset == 0)
-            {
-                lineRenderer.positionCount = 0;
-            }
-
+            if (offset == 0) lineRenderer.positionCount = 0;
             float time = Time.time;
             if (time > lastTime + 0.025f)
             {
@@ -152,15 +122,17 @@ public class BezierMachine : MonoBehaviour
                 positionCount++;
                 lineRenderer.positionCount = positionCount;
                 lastTime = time;
-                lineRenderer.SetPosition(positionCount - 1, bezierTrees[bezierTrees.Length - 1][0]);
+                lineRenderer.SetPosition(positionCount - 1, bTrees[bTrees.Length - 1][0]);
             }
         }
 
         // Control Handle
+#if UNITY_EDITOR
         foreach (Transform point in bezierPoints)
         {
             Handles.color = controlHandleColor * controlHandleOpacity;
             Handles.DrawSolidDisc(point.position, Vector3.forward, controlHandleRadius);
         }
+#endif
     }
 }

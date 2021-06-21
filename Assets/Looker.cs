@@ -4,10 +4,9 @@ public class Looker : MonoBehaviour
 {
     // The target marker.
     public Transform targetTransform;
-    private Transform lookTransform;
-
-    // Angular speed in radians per sec.
     public float speed = 1.0f;
+
+    private Transform lookTransform;
 
     private void Start()
     {
@@ -17,9 +16,9 @@ public class Looker : MonoBehaviour
 
     private void Update()
     {
-        Vector3 targetDirection = targetTransform.position - lookTransform.position;
+        Vector3 targetDir = targetTransform.position - lookTransform.position;
         float singleStep = speed * Time.deltaTime;
-        Vector3 newDirection = Vector3.RotateTowards(lookTransform.forward, targetDirection, singleStep, 0.0f);
-        lookTransform.rotation = Quaternion.LookRotation(newDirection);
+        Vector3 newDir = Vector3.RotateTowards(lookTransform.forward, targetDir, singleStep, 0.0f);
+        lookTransform.rotation = Quaternion.LookRotation(newDir);
     }
 }

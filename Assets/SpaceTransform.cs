@@ -17,7 +17,8 @@ public class SpaceTransform : MonoBehaviour
         DrawBasisVectors(pos, right, up);
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawSphere(trans.ToWorld(localPoint), 0.05f);
+        Vector2 worldPoint = trans.ToWorld(localPoint);
+        Gizmos.DrawSphere(worldPoint, 0.05f);
     }
 
     private void DrawBasisVectors(Vector2 pos, Vector2 right, Vector2 up)

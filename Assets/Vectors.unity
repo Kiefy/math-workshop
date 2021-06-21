@@ -464,8 +464,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c1c96f516edb2a4e8cbc47772137878, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objTf: {fileID: 323501554}
-  radius: 1
+  target: {fileID: 323501554}
+  viewRadius: 1
 --- !u!4 &468386542
 Transform:
   m_ObjectHideFlags: 0
@@ -474,7 +474,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 468386540}
   m_LocalRotation: {x: -0, y: -0, z: -0.12707582, w: -0.99189305}
-  m_LocalPosition: {x: 2.931, y: 0.308, z: 0}
+  m_LocalPosition: {x: 3.081, y: 0.552, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -492,9 +492,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 343476ac18767944d8d5c42f7e365418, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preciseness: 0.991
   target: {fileID: 323501554}
-  isLooking: 1
+  accuracy: 0.9
+  canSeeTarget: 1
 --- !u!1 &471243589
 GameObject:
   m_ObjectHideFlags: 0
@@ -1438,6 +1438,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2049444885}
+  - component: {fileID: 2049444886}
   m_Layer: 0
   m_Name: Space Transform
   m_TagString: Untagged
@@ -1452,10 +1453,23 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2049444884}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: 0.13986082, w: 0.99017125}
+  m_LocalPosition: {x: 3.745, y: 2.031, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 16.08}
+--- !u!114 &2049444886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2049444884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e4ec3dbe83ff1543b78848fb39e9e7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localPoint: {x: 0.6, y: 0.3}

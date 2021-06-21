@@ -145,11 +145,10 @@ public static class Kief
     /// Also provides a bool which is true if b is within radius.
     /// </summary>
     /// <remarks>
-    /// It isn't ideal since we would also need to square everything
-    /// that is compared with distSq (as we do with r), or Sqrt it before use, which negates
-    /// the purpose of the trick.
+    /// It isn't ideal since the dispSq isn't the real distance and can only be used as such if
+    /// we get the Square Root of it first, which negates any saving.
     ///
-    /// But if you only need a radius trigger, then this is fine.
+    /// But if you only need a radius trigger, then it is fine.
     /// </remarks>
     /// <param name="a">Start</param>
     /// <param name="b">End</param>
@@ -158,12 +157,12 @@ public static class Kief
     [Obsolete("Not really worth using except in performance critical situations.")]
     public static bool DistHack(Vector2 a, Vector2 b, float r)
     {
-        Vector2 disp = b - a; // Get the vector from a to b
+        Vector2 displacement = b - a; // Get the vector from a to b
 
-        //float distSq = disp.x * disp.x + disp.y * disp.y;
-        float dispSq = disp.sqrMagnitude; // Same as above ^
-        // Normally we would Sqrt() this squared displacement to get an accurate distance
-        return dispSq < r * r; // Square radius to avoid Sqrting distance
+        //float displacementSquared = displacement.x * displacement.x + displacement.y * displacement.y;
+        float displacementSquared = displacement.sqrMagnitude; // Same as above ^
+        // Normally we would Sqrt() displacementSquared to get an accurate distance
+        return displacementSquared < r * r; // Square [r]adius to avoid Sqrting displacementSquared
     }
 
     /// <summary>
@@ -192,6 +191,13 @@ public static class Kief
             color, null, thickness
         );
 #endif
+    }
+
+    public static Vector2 LocalToWorld(Transform localOrigin, Vector2 localPoint)
+    {
+        Vector2 x = localOrigin.right * localPoint.x;
+        Vector2 y = localOrigin.up * localPoint.y;
+        return (Vector2)localOrigin.position + x + y;
     }
 
     //////////////

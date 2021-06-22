@@ -193,12 +193,19 @@ public static class Kief
 #endif
     }
 
-    public static Vector2 LocalToWorld(Transform localOrigin, Vector2 localPoint)
+    /// <summary>
+    /// Transform Local space to World space
+    /// </summary>
+    /// <param name="localOrigin">Local transform</param>
+    /// <param name="localOffset">Local offset</param>
+    /// <returns>World space position</returns>
+    public static Vector2 LocalToWorld(Transform localOrigin, Vector2 localOffset)
     {
-        Vector2 x = localOrigin.right * localPoint.x;
-        Vector2 y = localOrigin.up * localPoint.y;
+        Vector2 x = localOrigin.right * localOffset.x;
+        Vector2 y = localOrigin.up * localOffset.y;
         return (Vector2)localOrigin.position + x + y;
     }
+
 
     //////////////
     // VECTOR 3 //

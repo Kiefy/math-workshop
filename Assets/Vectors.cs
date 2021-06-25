@@ -24,10 +24,6 @@ public class Vectors : MonoBehaviour
     private TravelData vectorRoute;
     private TravelData laserRoute;
 
-    //private float[] stepLengths;
-    //private float fullLength;
-    //private float routePos;
-
     private readonly Color red = new Color(1f, 0.26f, 0.26f);
     private readonly Color green = new Color(0.36f, 1f, 0.32f);
     private readonly Color blue = new Color(0.22f, 0.6f, 1f);
@@ -346,7 +342,7 @@ public class Vectors : MonoBehaviour
     // ╭──────────────────╮
     // │ Traveling sphere │
     // ╰──────────────────╯
-    private TravelData TravelingSphere(List<Vector3> points,
+    private TravelData TravelingSphere(IReadOnlyList<Vector3> points,
         TravelData tData,
         Color startColor,
         Color endColor)
@@ -369,7 +365,11 @@ public class Vectors : MonoBehaviour
             for (int i = 0; i < points.Count - 1; i++)
             {
                 float stepDistance = Kief.Distance(points[i], points[i + 1]);
+                //("points.Count: " + points.Count + " i: " + i + " tData.lengths.Length: " +
+                // tData.lengths.Length).Log();
+                if (i >= tData.lengths.Length) continue;
                 if (tData.lengths[i] == stepDistance) continue;
+                //tData.lengths[i].Log();
                 tData.fullLength += stepDistance - tData.lengths[i];
                 tData.lengths[i] = stepDistance;
             }
@@ -382,6 +382,7 @@ public class Vectors : MonoBehaviour
             length += tData.lengths[i];
             if (!(length > tData.routePos)) continue;
             Handles.color = Color.Lerp(startColor, endColor, tData.routePos / tData.fullLength);
+            if (i >= points.Count - 1) continue;
             Vector3 dir = Kief.Direction(points[i], points[i + 1]);
             float remap = Kief.Remap(
                 length - tData.lengths[i],

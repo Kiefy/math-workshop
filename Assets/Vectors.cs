@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
 
-#endif
 public class Vectors : MonoBehaviour
 {
-    [Range(0f, 0.02f)] public float speed;
     private const int MARKER_COUNT = 20;
 
     public Transform targetTransform;
@@ -22,7 +19,7 @@ public class Vectors : MonoBehaviour
     }
 
     private TravelData vectorRoute;
-    private TravelData laserRoute;
+    private static TravelData _laserRoute;
 
     private readonly Color red = new Color(1f, 0.26f, 0.26f);
     private readonly Color green = new Color(0.36f, 1f, 0.32f);
@@ -37,6 +34,7 @@ public class Vectors : MonoBehaviour
     {
         FloatExamples();
         Vector2Functions();
+        _laserRoute = new TravelData {routePos = 0};
     }
 
     private void OnDrawGizmos()
@@ -50,14 +48,20 @@ public class Vectors : MonoBehaviour
         PlayerToTargetGui(player, target);
 
         List<Vector3> vectorPoints = new List<Vector3> {origin, player, target};
-        vectorRoute = TravelingSphere(vectorPoints, vectorRoute, red, green);
+        vectorRoute = TravelingSphere(vectorPoints, vectorRoute, red, green, 0.1f, 0.01f);
+    }
 
-        if (CrossProduct.points.Count > 1)
-        {
-            List<Vector3> laserPoints = new List<Vector3>();
-            foreach (Vector3 t in CrossProduct.points) laserPoints.Add(t);
-            laserRoute = TravelingSphere(laserPoints, laserRoute, Color.cyan, Color.yellow);
-        }
+    public static void LaserStart(List<Vector3> pts)
+    {
+        if (pts.Count < 2) return;
+        _laserRoute = TravelingSphere(
+            pts,
+            _laserRoute,
+            new Color(0.22f, 0.6f, 1f),
+            new Color(1f, 0f, 0.52f),
+            0.025f,
+            0.05f
+        );
     }
 
     // ╭───────╮
@@ -342,60 +346,42 @@ public class Vectors : MonoBehaviour
     // ╭──────────────────╮
     // │ Traveling sphere │
     // ╰──────────────────╯
-    private TravelData TravelingSphere(IReadOnlyList<Vector3> points,
+    private static TravelData TravelingSphere(IReadOnlyList<Vector3> points,
         TravelData tData,
         Color startColor,
-        Color endColor)
+        Color endColor,
+        float radius,
+        float speed)
     {
-#if UNITY_EDITOR
-        void RebuildRoutes()
+        tData.fullLength = 0;
+        tData.lengths = new float[points.Count];
+        for (int i = 0; i < points.Count - 1; i++)
         {
-            tData.fullLength = 0;
-            tData.lengths = new float[points.Count];
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                tData.lengths[i] = Kief.Distance(points[i], points[i + 1]);
-                tData.fullLength += tData.lengths[i];
-            }
+            tData.lengths[i] = Kief.Distance(points[i], points[i + 1]);
+            tData.fullLength += tData.lengths[i];
         }
 
-        if (tData.lengths == null || tData.lengths.Length == 0) RebuildRoutes();
-        else
-        {
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                float stepDistance = Kief.Distance(points[i], points[i + 1]);
-                //("points.Count: " + points.Count + " i: " + i + " tData.lengths.Length: " +
-                // tData.lengths.Length).Log();
-                if (i >= tData.lengths.Length) continue;
-                if (tData.lengths[i] == stepDistance) continue;
-                //tData.lengths[i].Log();
-                tData.fullLength += stepDistance - tData.lengths[i];
-                tData.lengths[i] = stepDistance;
-            }
-        }
-
-        float length = 0;
+        float totalLength = 0;
         for (int i = 0; i < tData.lengths.Length - 1; i++)
         {
             if (tData.routePos > tData.fullLength) tData.routePos = 0;
-            length += tData.lengths[i];
-            if (!(length > tData.routePos)) continue;
+            totalLength += tData.lengths[i];
+            if (totalLength < tData.routePos) continue;
             Handles.color = Color.Lerp(startColor, endColor, tData.routePos / tData.fullLength);
-            if (i >= points.Count - 1) continue;
+            if (i > points.Count - 2) continue;
             Vector3 dir = Kief.Direction(points[i], points[i + 1]);
             float remap = Kief.Remap(
-                length - tData.lengths[i],
-                length,
+                totalLength - tData.lengths[i],
+                totalLength,
                 0f,
                 tData.lengths[i],
                 tData.routePos
             );
-            Handles.DrawSolidDisc(points[i] + dir * remap, Vector3.forward, 0.1f);
+            Handles.DrawSolidDisc(points[i] + dir * remap, Vector3.forward, radius);
             tData.routePos += speed;
             break;
         }
-#endif
+
         return tData;
     }
 }

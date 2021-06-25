@@ -9,8 +9,8 @@ public class BasisVector : MonoBehaviour
     {
         Transform trans = transform;
         Vector2 pos = trans.position;
-        Vector2 right = trans.right;
         Vector2 up = trans.up;
+        Vector2 right = trans.right;
 
         DrawBasisVectors(pos, right, up);
     }
@@ -23,5 +23,4 @@ public class BasisVector : MonoBehaviour
         Gizmos.DrawRay(pos, up);
         Gizmos.color = Color.white;
     }
-
 }

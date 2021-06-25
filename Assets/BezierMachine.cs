@@ -1,8 +1,7 @@
 using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
+using UnityEngine.Serialization;
 
-#endif
 public class BezierMachine : MonoBehaviour
 {
     public bool loop;
@@ -16,13 +15,13 @@ public class BezierMachine : MonoBehaviour
     public float controlLineThickness = 0.7f;
     [Range(0f, 1f)] public float controlLineOpacity = 0.7f;
 
-    [Range(0f, 0.1f)] public float jointRadius = 0.05f;
+    [FormerlySerializedAs("jointRadius")] [Range(0f, 0.1f)] public float jointSize = 0.05f;
     [Range(0f, 1f)] public float constructJointOpacity = 0.7f;
     public float constructLineThickness = 4f;
     [Range(0f, 1f)] public float constructLineOpacity = 0.7f;
 
     public Color finalJointColor = Color.white;
-    [Range(0f, 0.2f)] public float finalJointRadius = 0.1f;
+    [FormerlySerializedAs("finalJointRadius")] [Range(0f, 0.2f)] public float endJointSize = 0.1f;
     [Range(0f, 1f)] public float finalJointOpacity = 0.7f;
 
     public Transform[] bezierPoints;
@@ -75,12 +74,14 @@ public class BezierMachine : MonoBehaviour
                     if (x >= bTrees[i].Length - 1) continue;
                     bTrees[i + 1] ??= new Vector2[bTrees[i].Length - 1];
                     bTrees[i + 1][x] = Vector2.Lerp(bTrees[i][x], bTrees[i][x + 1], offset);
-#if UNITY_EDITOR
                     Handles.color = bezierColors[i % 6] * constructJointOpacity;
-                    Handles.DrawBezier(bTrees[i][x], bTrees[i][x + 1], bTrees[i][x], bTrees[i][x + 1],
-                        controlLineColor * controlLineOpacity, null, controlLineThickness);
-                    Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointRadius);
-#endif
+                    Handles.DrawBezier(
+                        bTrees[i][x], bTrees[i][x + 1],
+                        bTrees[i][x], bTrees[i][x + 1],
+                        controlLineColor * controlLineOpacity,
+                        null, controlLineThickness
+                    );
+                    Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointSize);
                 }
             }
             else if (i < bTrees.Length - 1)
@@ -90,21 +91,24 @@ public class BezierMachine : MonoBehaviour
                     if (x >= bTrees[i].Length - 1) continue;
                     bTrees[i + 1] ??= new Vector2[bTrees[i].Length - 1];
                     bTrees[i + 1][x] = Vector2.Lerp(bTrees[i][x], bTrees[i][x + 1], offset);
-#if UNITY_EDITOR
+
                     Handles.color = bezierColors[i % 6] * constructJointOpacity;
-                    Handles.DrawBezier(bTrees[i][x], bTrees[i][x + 1], bTrees[i][x], bTrees[i][x + 1],
-                        bezierColors[(i - 1) % 6] * constructLineOpacity, null, constructLineThickness);
+                    Handles.DrawBezier(
+                        bTrees[i][x], bTrees[i][x + 1],
+                        bTrees[i][x], bTrees[i][x + 1],
+                        bezierColors[(i - 1) % 6] * constructLineOpacity,
+                        null, constructLineThickness
+                    );
 
                     if (i != bTrees.Length - 2)
                     {
-                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointRadius);
+                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, jointSize);
                     }
                     else
                     {
                         Handles.color = finalJointColor * finalJointOpacity;
-                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, finalJointRadius);
+                        Handles.DrawSolidDisc(bTrees[i + 1][x], Vector3.forward, endJointSize);
                     }
-#endif
                 }
             }
         }
@@ -127,12 +131,10 @@ public class BezierMachine : MonoBehaviour
         }
 
         // Control Handle
-#if UNITY_EDITOR
         foreach (Transform point in bezierPoints)
         {
             Handles.color = controlHandleColor * controlHandleOpacity;
             Handles.DrawSolidDisc(point.position, Vector3.forward, controlHandleRadius);
         }
-#endif
     }
 }

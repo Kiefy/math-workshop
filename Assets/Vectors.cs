@@ -14,9 +14,19 @@ public class Vectors : MonoBehaviour
     private float offsetT;
     private bool jump;
 
-    private float[] stepLengths;
-    private float fullLength;
-    private float routePos;
+    private struct TravelData
+    {
+        public float[] lengths;
+        public float fullLength;
+        public float routePos;
+    }
+
+    private TravelData vectorRoute;
+    private TravelData laserRoute;
+
+    //private float[] stepLengths;
+    //private float fullLength;
+    //private float routePos;
 
     private readonly Color red = new Color(1f, 0.26f, 0.26f);
     private readonly Color green = new Color(0.36f, 1f, 0.32f);
@@ -43,8 +53,15 @@ public class Vectors : MonoBehaviour
         OriginToPlayerGui(origin, player);
         PlayerToTargetGui(player, target);
 
-        Vector2[] points = {origin, player, target};
-        TravelingSphere(points, red, green);
+        List<Vector3> vectorPoints = new List<Vector3> {origin, player, target};
+        vectorRoute = TravelingSphere(vectorPoints, vectorRoute, red, green);
+
+        if (CrossProduct.points.Count > 1)
+        {
+            List<Vector3> laserPoints = new List<Vector3>();
+            foreach (Vector3 t in CrossProduct.points) laserPoints.Add(t);
+            laserRoute = TravelingSphere(laserPoints, laserRoute, Color.cyan, Color.yellow);
+        }
     }
 
     // ╭───────╮
@@ -329,54 +346,55 @@ public class Vectors : MonoBehaviour
     // ╭──────────────────╮
     // │ Traveling sphere │
     // ╰──────────────────╯
-    private void TravelingSphere(IReadOnlyList<Vector2> points, Color startColor, Color endColor)
+    private TravelData TravelingSphere(List<Vector3> points,
+        TravelData tData,
+        Color startColor,
+        Color endColor)
     {
 #if UNITY_EDITOR
         void RebuildRoutes()
         {
-            fullLength = 0;
-            stepLengths = new float[points.Count];
+            tData.fullLength = 0;
+            tData.lengths = new float[points.Count];
             for (int i = 0; i < points.Count - 1; i++)
             {
-                stepLengths[i] = Kief.Distance(points[i], points[i + 1]);
-                fullLength += stepLengths[i];
+                tData.lengths[i] = Kief.Distance(points[i], points[i + 1]);
+                tData.fullLength += tData.lengths[i];
             }
         }
 
-        if (stepLengths == null || stepLengths.Length == 0) RebuildRoutes();
+        if (tData.lengths == null || tData.lengths.Length == 0) RebuildRoutes();
         else
         {
             for (int i = 0; i < points.Count - 1; i++)
             {
                 float stepDistance = Kief.Distance(points[i], points[i + 1]);
-                if (stepLengths[i] == stepDistance) continue;
-                fullLength += stepDistance - stepLengths[i];
-                stepLengths[i] = stepDistance;
+                if (tData.lengths[i] == stepDistance) continue;
+                tData.fullLength += stepDistance - tData.lengths[i];
+                tData.lengths[i] = stepDistance;
             }
         }
 
         float length = 0;
-        for (int i = 0; i < stepLengths.Length - 1; i++)
+        for (int i = 0; i < tData.lengths.Length - 1; i++)
         {
-            if (routePos > fullLength) routePos = 0;
-            length += stepLengths[i];
-            if (!(length > routePos)) continue;
-            Handles.color = Color.Lerp(startColor, endColor, routePos / fullLength);
-            Vector2 dir = Kief.Direction(points[i], points[i + 1]);
-            float remap = Kief.Remap(length - stepLengths[i], length, 0f, stepLengths[i], routePos);
+            if (tData.routePos > tData.fullLength) tData.routePos = 0;
+            length += tData.lengths[i];
+            if (!(length > tData.routePos)) continue;
+            Handles.color = Color.Lerp(startColor, endColor, tData.routePos / tData.fullLength);
+            Vector3 dir = Kief.Direction(points[i], points[i + 1]);
+            float remap = Kief.Remap(
+                length - tData.lengths[i],
+                length,
+                0f,
+                tData.lengths[i],
+                tData.routePos
+            );
             Handles.DrawSolidDisc(points[i] + dir * remap, Vector3.forward, 0.1f);
-            routePos += speed;
+            tData.routePos += speed;
             break;
         }
 #endif
-    }
-
-    private void DrawBasisVectors(Vector2 pos, Vector2 right, Vector2 up)
-    {
-        Gizmos.color = red;
-        Gizmos.DrawRay(pos, right);
-        Gizmos.color = green;
-        Gizmos.DrawRay(pos, up);
-        Gizmos.color = Color.white;
+        return tData;
     }
 }

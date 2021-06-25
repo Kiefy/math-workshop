@@ -173,6 +173,7 @@ public static class Kief
     /// 1: Identical<br/>
     /// -1: Opposite<br/>
     /// 0: Perpendicular<br/>
+    /// With all the fractional values in-between.
     /// </remarks>
     /// <param name="a">Angle A</param>
     /// <param name="b">Angle B</param>
@@ -196,14 +197,28 @@ public static class Kief
     /// <summary>
     /// Transform Local space to World space
     /// </summary>
-    /// <param name="localOrigin">Local transform</param>
+    /// <param name="refPoint">Reference transform</param>
     /// <param name="localOffset">Local offset</param>
     /// <returns>World space position</returns>
-    public static Vector2 LocalToWorld(Transform localOrigin, Vector2 localOffset)
+    public static Vector2 LocalToWorld(Transform refPoint, Vector2 localOffset)
     {
-        Vector2 x = localOrigin.right * localOffset.x;
-        Vector2 y = localOrigin.up * localOffset.y;
-        return (Vector2)localOrigin.position + x + y;
+        Vector2 x = refPoint.right * localOffset.x;
+        Vector2 y = refPoint.up * localOffset.y;
+        return (Vector2) refPoint.position + x + y;
+    }
+
+    /// <summary>
+    /// Transform World space to Local space
+    /// </summary>
+    /// <param name="refPoint">Reference transform</param>
+    /// <param name="worldOffset">World offset</param>
+    /// <returns>Local space position</returns>
+    public static Vector2 WorldToLocal(Transform refPoint, Vector2 worldOffset)
+    {
+        Vector2 relativePt = worldOffset - (Vector2) refPoint.position;
+        float x = Vector2.Dot(relativePt, refPoint.right);
+        float y = Vector2.Dot(relativePt, refPoint.up);
+        return new Vector2(x, y);
     }
 
 
@@ -224,5 +239,16 @@ public static class Kief
 
         // return Mathf.Sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
         return p.magnitude; // Same as above ^
+    }
+
+    /// <summary>
+    /// Bounce/Reflect the dir off the normal.
+    /// </summary>
+    /// <param name="normal">Surface normal</param>
+    /// <param name="dir">Incoming direction</param>
+    /// <returns>Reflected direction</returns>
+    public static Vector3 Reflect(Vector3 normal, Vector3 dir)
+    {
+        return dir - 2f * (Vector3.Dot(normal, dir) * normal);
     }
 }

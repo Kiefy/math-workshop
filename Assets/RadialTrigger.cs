@@ -16,39 +16,39 @@ using UnityEditor;
 
 public class RadialTrigger : MonoBehaviour
 {
-    public Transform target;
-    [Range(0f, 4f)] public float viewRadius = 1f;
+  public Transform target;
+  [Range(0f, 4f)] public float viewRadius = 1f;
 
-    private LookTrigger lookTrigger;
-    private float counter;
+  private LookTrigger lookTrigger;
+  private float counter;
 
-    private void OnDrawGizmos()
+  private void OnDrawGizmos()
+  {
+    lookTrigger = GetComponent<LookTrigger>();
+    Vector2 center = transform.position;
+    Vector2 targetPos = target.position;
+    float distance = Vector2.Distance(center, targetPos);
+    bool isInside = distance < viewRadius;
+    if (isInside && lookTrigger.canSeeTarget)
     {
-        lookTrigger = GetComponent<LookTrigger>();
-        Vector2 center = transform.position;
-        Vector2 targetPos = target.position;
-        float distance = Vector2.Distance(center, targetPos);
-        bool isInside = distance < viewRadius;
-        if (isInside && lookTrigger.canSeeTarget)
-        {
 #if UNITY_EDITOR
-            Handles.color = Color.red;
-            Handles.DrawDottedLine(center, targetPos, 0.1f);
+      Handles.color = Color.red;
+      Handles.DrawDottedLine(center, targetPos, 0.1f);
 #endif
-            if (counter < distance)
-            {
-                counter += 0.005f;
+      if (counter < distance)
+      {
+        counter += 0.005f;
 #if UNITY_EDITOR
-                Handles.color = Color.Lerp(Color.yellow, Color.red, counter / distance);
-                Vector2 originPlayerOffset = center + Kief.Direction(center, targetPos) * counter;
-                Handles.DrawSolidDisc(originPlayerOffset, Vector3.forward, 0.025f);
+        Handles.color = Color.Lerp(Color.yellow, Color.red, counter / distance);
+        Vector2 originPlayerOffset = center + Kief.Direction(center, targetPos) * counter;
+        Handles.DrawSolidDisc(originPlayerOffset, Vector3.forward, 0.025f);
 #endif
-            }
-            else if (counter > distance) counter = 0f;
-        }
-#if UNITY_EDITOR
-        Handles.color = isInside ? Color.red : Color.gray;
-        Handles.DrawWireDisc(center, Vector3.forward, viewRadius, 2f);
-#endif
+      }
+      else if (counter > distance) counter = 0f;
     }
+#if UNITY_EDITOR
+    Handles.color = isInside ? Color.red : Color.gray;
+    Handles.DrawWireDisc(center, Vector3.forward, viewRadius, 2f);
+#endif
+  }
 }
